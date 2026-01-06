@@ -4,15 +4,20 @@ import { Header } from '@/components/Dashboard/Header';
 import { MetricCard } from '@/components/Dashboard/MetricCard';
 import { CompanySelector } from '@/components/Dashboard/CompanySelector';
 import { TimeRangeSelector } from '@/components/Dashboard/TimeRangeSelector';
+import { DateRangePicker } from '@/components/Dashboard/DateRangePicker';
 import { SalesTrendChart } from '@/components/Dashboard/SalesTrendChart';
 import { ChannelPieChart } from '@/components/Dashboard/ChannelPieChart';
 import { CompanyBarChart } from '@/components/Dashboard/CompanyBarChart';
 import { DailyBreakdownTable } from '@/components/Dashboard/DailyBreakdownTable';
-import { useSalesData, TimeRange } from '@/hooks/useSalesData';
+import { useSalesData, TimeRange, DateRange } from '@/hooks/useSalesData';
 
 const Index = () => {
   const [selectedCompany, setSelectedCompany] = useState<string | 'all'>('all');
   const [timeRange, setTimeRange] = useState<TimeRange>('daily');
+  const [customDateRange, setCustomDateRange] = useState<DateRange>({
+    from: undefined,
+    to: undefined,
+  });
 
   const {
     aggregatedData,
@@ -21,7 +26,7 @@ const Index = () => {
     companyTotals,
     averageDaily,
     rawData,
-  } = useSalesData(selectedCompany, timeRange);
+  } = useSalesData(selectedCompany, timeRange, customDateRange);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -41,7 +46,15 @@ const Index = () => {
         <div className="mb-8 space-y-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <CompanySelector selected={selectedCompany} onSelect={setSelectedCompany} />
-            <TimeRangeSelector selected={timeRange} onSelect={setTimeRange} />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <TimeRangeSelector selected={timeRange} onSelect={setTimeRange} />
+              {timeRange === 'custom' && (
+                <DateRangePicker 
+                  dateRange={customDateRange} 
+                  onDateRangeChange={setCustomDateRange} 
+                />
+              )}
+            </div>
           </div>
         </div>
 
