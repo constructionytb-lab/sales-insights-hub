@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { TimeRange } from '@/hooks/useSalesData';
-import { Calendar, CalendarDays, CalendarRange, BarChart3 } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarRange, BarChart3, CalendarCheck } from 'lucide-react';
 
 interface TimeRangeSelectorProps {
   selected: TimeRange;
@@ -12,6 +12,7 @@ const timeRanges: { value: TimeRange; label: string; icon: React.ReactNode }[] =
   { value: 'weekly', label: 'Weekly', icon: <CalendarDays className="h-4 w-4" /> },
   { value: 'monthly', label: 'Monthly', icon: <CalendarRange className="h-4 w-4" /> },
   { value: 'quarterly', label: 'Quarterly', icon: <BarChart3 className="h-4 w-4" /> },
+  { value: 'custom', label: 'Custom', icon: <CalendarCheck className="h-4 w-4" /> },
 ];
 
 export const TimeRangeSelector = ({ selected, onSelect }: TimeRangeSelectorProps) => {

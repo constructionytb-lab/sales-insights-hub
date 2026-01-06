@@ -2,7 +2,12 @@ import { useMemo } from 'react';
 import { salesData, SalesRecord, CHANNELS, Channel } from '@/data/salesData';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, parseISO, isWithinInterval, format } from 'date-fns';
 
-export type TimeRange = 'daily' | 'weekly' | 'monthly' | 'quarterly';
+export type TimeRange = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'custom';
+
+export interface DateRange {
+  from: Date | undefined;
+  to: Date | undefined;
+}
 
 export interface AggregatedData {
   period: string;
@@ -14,8 +19,14 @@ export interface AggregatedData {
   TOTAL: number;
 }
 
-export const useSalesData = (selectedCompany: string | 'all', timeRange: TimeRange) => {
+export const useSalesData = (
+  selectedCompany: string | 'all', 
+  timeRange: TimeRange,
+  customDateRange?: DateRange
+) => {
   const filteredData = useMemo(() => {
+    let data: SalesRecord[] = [];
+    
     if (selectedCompany === 'all') {
       // Combine all company data
       const combined: Record<string, SalesRecord> = {};
@@ -33,12 +44,24 @@ export const useSalesData = (selectedCompany: string | 'all', timeRange: TimeRan
           }
         });
       });
-      return Object.values(combined).sort((a, b) => a.date.localeCompare(b.date));
+      data = Object.values(combined).sort((a, b) => a.date.localeCompare(b.date));
+    } else {
+      const company = salesData.find(c => c.name === selectedCompany);
+      data = company?.data || [];
     }
-    
-    const company = salesData.find(c => c.name === selectedCompany);
-    return company?.data || [];
-  }, [selectedCompany]);
+
+    // Apply custom date range filter
+    if (timeRange === 'custom' && customDateRange?.from) {
+      data = data.filter(record => {
+        const recordDate = parseISO(record.date);
+        const from = customDateRange.from!;
+        const to = customDateRange.to || customDateRange.from!;
+        return isWithinInterval(recordDate, { start: from, end: to });
+      });
+    }
+
+    return data;
+  }, [selectedCompany, timeRange, customDateRange]);
 
   const aggregatedData = useMemo((): AggregatedData[] => {
     if (timeRange === 'daily') {
